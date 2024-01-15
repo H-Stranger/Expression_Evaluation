@@ -6,84 +6,74 @@ double Calculate(char c, double L, double R)
 {
 	switch (c)
 	{
-		case '+': return (L + R);
-		case '-': return L - R;
-		case '*': return L * R;
-		case '/':
+	case '+': return (L + R);
+	case '-': return L - R;
+	case '*': return L * R;
+	case '/':
+	{
+		if (0 == R)
 		{
-			if (0 == R)
-			{
-				printf("被除数不为0！\n");
-				exit(-1);//程序直接结束运行
-			}
-			else
-				return L / R;
+			printf("被除数不为0！\n");
+			exit(-1);//程序直接结束运行
 		}
-		case '^': return pow(L, R);
-		case '%': return (int)L % (int)R;
-		default:
-		{
-			printf("暂不提供“%c”支持!\n", c);
-			return 0;
-		}
+		else
+			return L / R;
+	}
+	case '^': return pow(L, R);
+	case '%': return (int)L % (int)R;
+	default:
+	{
+		printf("暂不提供“%c”支持!\n", c);
+		return 0;
+	}
 
 	}
 }
-void Run_test()
+
+//功能：弹出操作数栈的两个数和操作符栈的一个操作符进行运算，并将结果重新入操作数栈
+void stackCal(StackOprt* poprt, StackOprd* poprd)
 {
-	////创建操作符和操作数结构体
-	//StackOprt oprt;
-	//StackOprd oprd;
-	//Init_stackOprt(&oprt);
-	//Init_stackOprd(&oprd);
-	//printf("%d\n", Init_stackOprd(&oprt));
-	////入栈测试
-	//printf("%d\n", Push_stackOprt(&oprt, 'c'));
-	//printf("%d\n", Push_stackOprt(&oprt, 'd'));
-	//printf("%d\n", Push_stackOprt(&oprt, 'e'));
+	double R = Top_stackOprd(poprd);//等式右边在栈顶
+	Pop_stackOprd(poprd);//出栈
 
-	////出栈测试
-	//printf("%d\n", Pop_stackOprt(&oprt));
-
-	//printf("%c\n", Top_stackOprt(&oprt));//栈顶测试
-	//printf("%d\n", Pop_stackOprt(&oprt));
-
-	//printf("%c\n", oprt.oprt[oprt.top - 1]);
-
-	//printf("%d\n", Pop_stackOprt(&oprt));
-	//printf("%d\n", Pop_stackOprt(&oprt));//栈空
-	//printf("%d\n", isEmpty_stackOprt(&oprt));//判断栈空测试
-
-
-	//printf("--------------------------------\n");
-
-	////测试符号优先级
-	//printf("%d\n",Prior('+'));
-	////操作符
-	//printf("%d\n",Is_oprt(')'));
-
-	////计算函数测试
-	//printf("%f\n", Calculate('+', 2, 3));
-	//printf("%lf\n", Calculate('^', 2, 4));
-	////printf("%lf\n", Calculate('/', 2, 0));
-	//printf("提示：小数取余会直接被进行整数处理\n");
-	//printf("%lf\n", Calculate('%', 9.3, 2));
-	//printf("end\n");
-
+	double L = Top_stackOprd(poprd);
+	Pop_stackOprd(poprd);
+	//计算
+	double res = Calculate(Top_stackOprt(poprt), L, R);
+	Pop_stackOprt(poprt);//操作符弹出
+	//计算结果入栈
+	printf("%lf操作数计算结果入栈>\n", res);
+	Push_stackOprd(poprd, res);
 }
+
+//功能：展示表达式运算过程
+void Print(char* pc)
+{
+	Sleep(1000);
+	int i;
+	for (i = 0; pc[i]; i++)
+	{
+		printf("%c", pc[i]);
+	}
+	printf("\n");
+}
+
 
 void GetAns()
 {
+	//创建结构体 初始化
 	StackOprt oprt;
 	StackOprd oprd;
 	Init_stackOprd(&oprd);
 	Init_stackOprt(&oprt);
 
+	printf("请输入表达式:>(以#开头结尾)\n");
+	//接收表达式
 	char str[MAX_SIZE];
 	gets(str);
 
-	char* p = str;//通过数组地址处理
-	int num = 0;//操作数整型
+	char* p = str;//创建指针处理字符数组
+	double num = 0;//多个单字符转换多位数
 	while (*p != '\0')
 	{
 		//判断操作数
@@ -96,72 +86,94 @@ void GetAns()
 				continue;	//数组往后判断，num值保留
 			}
 			//结果入栈
+			Push_stackOprd(&oprd, num);
 			num = 0;
-			int res = Push_stackOprd(&oprd, num);
-			//p++;
 		}
 		else if (Is_oprt(*p))
 		{
-			//优先级：栈顶元素优小于字符串操作符
-			if (*p == '(' || Prior(Top_stackOprt(&oprt)) < Prior(*p))
+			//初始'#'入栈 左括号单独判断入栈
+			if (*p == '#' && oprd.top == 0 || *p=='(')
 			{
 				Push_stackOprt(&oprt, *p);
-				
-				//栈顶元素和字符串都为#结束
-				if (Top_stackOprt(&oprt) == '#' && *p == '#')
-					return Top_stackOprd(&oprd);//最终计算的结果
-			}
-			else if (Prior(&oprt) >= Prior(*p))
-			{
-				//当前操作符栈里的所有元素都弹出直到#
-				while (Top_stackOprd(&oprt) != '#')
-				{
-					double R = Top_stackOprd(&oprd);//等式右边在栈顶
-					Pop_stackOprd(&oprd);//出栈
-
-					double L = Top_stackOprd(&oprd);
-					Pop_stackOprd(&oprd);
-					//计算
-					double res = Calculate(Top_stackOprt(&oprt), L, R);
-					Pop_stackOprt(&oprt);//操作符弹出
-					//计算结果入栈
-					Push_stackOprd(&oprd, res);
-				}
 			}
 			else if (*p == ')')
 			{
 				//同样的运算思路，只是判断条件不一样
 				while (Top_stackOprt(&oprt) != '(')
 				{
-					double R = Top_stackOprd(&oprd);//等式右边在栈顶
-					Pop_stackOprd(&oprd);//出栈
-
-					double L = Top_stackOprd(&oprd);
-					Pop_stackOprd(&oprd);
-					//计算
-					double res = Calculate(Top_stackOprt(&oprt), L, R);
-					Pop_stackOprt(&oprt);//操作符弹出
-					//计算结果入栈
-					Push_stackOprd(&oprd, res);
+					stackCal(&oprt, &oprd);
 				}
-				Pop_stackOprd(&oprd);
+				Pop_stackOprt(&oprt);//左括号弹出去
+			}
+			else if (*p == '#' && oprt.oprt[0] == '#')
+			{
+				while (Top_stackOprt(&oprt) != '#')
+				{
+					stackCal(&oprt, &oprd);
+				}
+			}
+			//优先级：栈顶元素优小于字符串操作符
+			else if (Prior(Top_stackOprt(&oprt)) < Prior(*p))
+			{
+				Push_stackOprt(&oprt, *p);
+			}
+			else if (Prior(Top_stackOprt(&oprt)) >= Prior(*p))
+			{
+				//当前操作符栈里的所有元素都弹出直到#
+				stackCal(&oprt, &oprd);
+				Push_stackOprt(&oprt, *p);
 			}
 		}
-		else if (*p == ' ')
-			;//数组向后继续访问即可
+		//如果碰到空格判断语句均跳过
+		Print(p);
 		p++;//直接放到末尾
 	}
-	printf("结果：%lf\n", Top_stackOprd(&oprd));
+	printf("运算结果：%lf\n", Top_stackOprd(&oprd));
+}
+
+
+void menu()
+{
+	printf("*****************************************\n");
+	printf("***********    1.表达式求值   ***********\n");
+	printf("***********     2.课设创作    ***********\n");
+	printf("***********       0.退出      ***********\n");
+	printf("*****************************************\n");
+}
+void ShowInfo()
+{
+	printf("\n");
+	printf("*****************************************\n");
+	printf(" >Class: 22级计算机科学与技术专业        \n");
+	printf(" >Author:  何秀东   邱鹏                 \n");
+	printf(" >Created Time: 2024年1月15日    星期一  \n");
+	printf("*****************************************\n");
+	printf("\n");
 }
 
 int main()
 {
-	//Run_test();
-	//printf("%d\n", 0 % 2);
-	//printf("%d\n", 9 % -5);
-	//printf("%d\n", 9 % 3.2);
-	GetAns();
-
+	int input;
+	do 
+	{
+		menu();
+		scanf("%d", &input);
+		switch (input)
+		{
+		case 1:
+		{
+			getchar();
+			GetAns();
+			break;
+		}
+		case 2:
+			ShowInfo();
+			break;
+		case 0:
+			printf("退出\n");
+			break;
+		}
+	} while (input);
+	
 	return 0;
 }
-

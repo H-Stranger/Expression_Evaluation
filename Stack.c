@@ -53,8 +53,6 @@ static void CheckCapacity_oprt(StackOprt* pOprt)
 	}
 }
 
-
-
 //操作符入栈
 int Push_stackOprt(StackOprt* pOprt, char c)
 {
@@ -167,37 +165,37 @@ bool isEmpty_stackOprd(StackOprd* pOprd)
 //操作函数
 
 //返回优先级函数
-int Prior(char ch)
+int Prior(char c)
 {
-	switch (ch)
+	switch (c)
 	{
-		case '#': return -1;//结束
-		case '+': return 2;
-		case '-': return 2;
-		case '*': return 3;
-		case '/': return 3;
-		case '%': return 3;//取余
-		case '^': return 4;//幂
-		case '(': return 0;
-		case ')': return 1;
-		default:
-		{
-			printf("优先级寻找失败\n");
-			break;
-		}
+	case '#': return -1; break;//结束
+	case '+': return 2; break;
+	case '-': return 2; break;
+	case '*': return 3; break;
+	case '/': return 3; break;
+	case '%': return 3; break;//取余
+	case '^': return 4; break;//幂
+	case '(': return 0; break;
+	case ')': return 1; break;
+	default:
+	{
+		printf("优先级寻找失败\n");
+		break;
+	}
 	}
 	return -1;
 }
 
 //判断操作符
-int Is_oprt(char ch)
+int Is_oprt(char c)
 {
 	int i = 0;
-	char s[8] = { '+', '-', '*' , '/','%', '^', '(', ')' };
+	char s[9] = { '+', '-', '*' , '/','%', '^', '(', ')','#'};
 	//遍历判断
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 9; i++)
 	{
-		if (s[i] == ch)
+		if (s[i] == c)
 			return OK;
 	}
 
@@ -205,10 +203,12 @@ int Is_oprt(char ch)
 }
 
 //判断操作数
-int Is_oprd(char ch)
+int Is_oprd(char c)
 {
-	if (ch >= '0' && ch <= '9')
+	if (c >= '0' && c <= '9')
 		return OK;
 	return NO;
 }
+
+
 
